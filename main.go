@@ -102,6 +102,39 @@ func NonBlockingWrite(fd int, buf []byte) error {
 	return nil
 }
 
+// NonBlockingWrite2 writes up to two bytes slices to a file descriptor in a
+// single syscall. It fails if partial data is written
+func NonBlockingWrite2(fd int, b1, b2 []byte) error {
+    // If there is no second buffer, issue a regular write.
+    if len(b2) == 0 {
+        return NonBlockingWrite(fd, b1)
+    }
+
+    // We have two buffers. Build the iovec that represents them and issue
+    // a writev syscall.
+    iovec := [...]syscall.Iovec{
+        {
+            Base: (*byte)(unsafe.Pointer(&b1[0])),
+            Len: uint64(len(b1)),
+        },
+        {
+            Base: (*byte)(unsafe.Pointer(&b2[0])),
+            Len: uint64(len(b2)),
+        },
+    }
+
+    n, _, e := syscall.RawSyscall(syscall.SYS_WRITEV, uintptr(fd), uintptr(unsafe.Pointer(&iovec[0])), 2)
+    if e != 0 {
+        return e
+    }
+
+    if n != uintptr(len(b1)+len(b2)) {
+        return fmt.Errorf("wrong number of bytes written: expected: %d, got %d", len(b1)+len(b2), n)
+    }
+
+    return nil
+}
+
 func main() {
     log.Println("start")
     name := "tun0"
