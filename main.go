@@ -119,9 +119,9 @@ func main() {
     log.Printf("mtu fd is %d", mtu)
 
     b := make([]byte, 20)
-    go BlockingRead(fd, b)
-    go NonBlockingWrite(fd, []byte{'h', 'e', 'l', 'l', 'o'})
+    BlockingRead(fd, b)
 
-    time.Sleep(10 * 1000 * time.Millisecond)
     log.Println(b)
+
+    NonBlockingWrite(fd, b)
 }
