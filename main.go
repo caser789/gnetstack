@@ -3,6 +3,7 @@ package main
 import "log"
 import "syscall"
 import "unsafe"
+import "math"
 
 // Open opens the specified TUN device, sets it to non-blocking mode, and
 // returns its file descriptor.
@@ -55,6 +56,32 @@ func GetMTU(name string) (int, error) {
     return int(ifreq.mtu), nil
 }
 
+// BlockingRead reads from a file descriptor that is set up as non-blocking. If
+// no data is available, it will block in a poll() syscall until the file
+// descriptor becomes readable.
+func BlockingRead(fd int, b []byte) (int, error) {
+    for {
+        n, _, e := syscall.RawSyscall(syscall.SYS_READ, uintptr(fd), uintptr(unsafe.Pointer(&b[0])), uintptr(len(b)))
+        if e == 0 {
+            return int(n), nil
+        }
+
+        event := struct {
+            fd int32
+            events int16
+            revents int16
+        }{
+            fd: int32(fd),
+            events: 1, //POLLIN
+        }
+
+        _, _, e = syscall.Syscall(syscall.SYS_POLL, uintptr(unsafe.Pointer(&event)), 1, uintptr(math.MaxUint64))
+        if e != 0 && e != syscall.EINTR {
+            return 0, e
+        }
+    }
+}
+
 func main() {
     log.Println("start")
     name := "tun0"
@@ -63,11 +90,16 @@ func main() {
         log.Printf("error = %q", err)
     }
 
-    log.Printf("opened fd is %q", fd)
+    log.Printf("opened fd is %d", fd)
 
     mtu, err := GetMTU("tun0")
     if err != nil {
         log.Printf("error = %q", err)
     }
-    log.Printf("mtu fd is %q", mtu)
+    log.Printf("mtu fd is %d", mtu)
+
+    b := make([]byte, 100)
+    BlockingRead(fd, b)
+
+    log.Printf("b is %q", b)
 }
