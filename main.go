@@ -83,6 +83,24 @@ func BlockingRead(fd int, b []byte) (int, error) {
     }
 }
 
+func NonBlockingWrite(fd int, buf []byte) error {
+    var ptr unsafe.Pointer
+    if len(buf) > 0 {
+        ptr = unsafe.Pointer(&buf[0])
+    }
+
+    n, _, e := syscall.RawSyscall(syscall.SYS_WRITE, uintptr(fd), uintptr(ptr), uintptr(len(buf)))
+    if e != 0 {
+        return e
+    }
+
+    if n != uintptr(len(buf)) {
+        return fmt.Errorf("wrong number of bytes written: expected %d, got %d", len(buf), n)
+    }
+
+    return nil
+}
+
 func main() {
     log.Println("start")
     name := "tun0"
@@ -98,6 +116,8 @@ func main() {
         log.Printf("error = %q", err)
     }
     log.Printf("mtu fd is %d", mtu)
+
+    go NonBlockingWrite(fd, []byte{'h', 'e', 'l', 'l', 'o'})
 
     b := make([]byte, 100)
     BlockingRead(fd, b)
