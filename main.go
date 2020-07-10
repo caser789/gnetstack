@@ -91,10 +91,13 @@ func NonBlockingWrite(fd int, buf []byte) error {
     }
 
     n, _, e := syscall.RawSyscall(syscall.SYS_WRITE, uintptr(fd), uintptr(ptr), uintptr(len(buf)))
+
     if e != 0 {
         log.Printf("write error %q", e)
         return e
     }
+
+    log.Printf("written %d", n)
 
     if n != uintptr(len(buf)) {
         return fmt.Errorf("wrong number of bytes written: expected %d, got %d", len(buf), n)
