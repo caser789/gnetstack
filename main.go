@@ -61,6 +61,7 @@ func GetMTU(name string) (int, error) {
 // descriptor becomes readable.
 func BlockingRead(fd int, b []byte) (int, error) {
     for {
+        log.Println("before read")
         n, _, e := syscall.RawSyscall(syscall.SYS_READ, uintptr(fd), uintptr(unsafe.Pointer(&b[0])), uintptr(len(b)))
         if e == 0 {
             return int(n), nil
