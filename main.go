@@ -1,6 +1,7 @@
 package main
 
 import "log"
+import "time"
 import "fmt"
 import "syscall"
 import "unsafe"
@@ -65,8 +66,12 @@ func BlockingRead(fd int, b []byte) (int, error) {
         log.Println("before read")
         n, _, e := syscall.RawSyscall(syscall.SYS_READ, uintptr(fd), uintptr(unsafe.Pointer(&b[0])), uintptr(len(b)))
         if e == 0 {
+            log.Printf("read error %q", e)
             return int(n), nil
         }
+
+        log.Printf("read n %d", n)
+        log.Printf("b is %q", b)
 
         event := struct {
             fd int32
@@ -122,10 +127,9 @@ func main() {
     }
     log.Printf("mtu fd is %d", mtu)
 
+    b := make([]byte, 100)
+    go BlockingRead(fd, b)
     go NonBlockingWrite(fd, []byte{'h', 'e', 'l', 'l', 'o'})
 
-    b := make([]byte, 100)
-    BlockingRead(fd, b)
-
-    log.Printf("b is %q", b)
+    time.Sleep(10 * 1000 * time.Millisecond)
 }
