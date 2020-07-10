@@ -1,6 +1,7 @@
 package main
 
 import "log"
+import "fmt"
 import "syscall"
 import "unsafe"
 import "math"
@@ -91,6 +92,7 @@ func NonBlockingWrite(fd int, buf []byte) error {
 
     n, _, e := syscall.RawSyscall(syscall.SYS_WRITE, uintptr(fd), uintptr(ptr), uintptr(len(buf)))
     if e != 0 {
+        log.Printf("write error %q", e)
         return e
     }
 
