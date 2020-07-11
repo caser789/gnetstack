@@ -1,7 +1,5 @@
 package header
 
-const versIHL = 0
-
 // MaxIPPacketSize is the maximum supported IP packet size, exluding
 // jumbograms. The maximum IPv4 packet size is 64k-1 (total size must fit
 // in 16 bits). For IPv6, the payload max size (excluding jumbograms) is

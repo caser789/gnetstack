@@ -13,6 +13,9 @@ import "github.com/caser789/netstack/tcpip/header"
 // TotalLength field of the ipv4 header.
 const maxTotalSize = 0xffff
 
+// ProtocolNumber is the ipv4 protocol number
+const ProtocolNumber = header.IPv4ProtocolNumber
+
 type endpoint struct {
     linkEP stack.LinkEndpoint
 }
@@ -38,4 +41,26 @@ func (e *endpoint) MTU() uint32 {
     }
 
     return lmtu - uint32(e.MaxHeaderLength())
+}
+
+func (e *endpoint) WritePacket(hdr *buffer.Prependable, payload buffer.View, protocol tcpip.TransportProtocolNumber) error {
+    ip := header.IPv4(hdr.Prepend(header.IPv4MinimumSize))
+    length := uint16(hdr.UsedLength() + len(payload))
+    id := uint32(0)
+    if length > header.IPv4MaximumHeaderSize + 8 {
+        // Packet of 68 bytes or less are required by RFC 791 to not be
+        // fragmented, so we only assign ids to larger packets.
+    }
+    ip.Encode(&header.IPv4Fields{
+        IHL: header.IPv4MinimumSize,
+        TotalLength: length,
+        ID: uint16(id),
+        TTL: 65,
+        Protocol: uint8(protocol),
+        SrcAddr: tcpip.Address(e.address[:]),
+        DstAddr: r.RemoteAddress,
+    })
+    ip.SetChecksum(^ip.CalculatedChecksum())
+
+    return e.linkEP.WritePacket(hdr, payload, ProtocolNumber)
 }
