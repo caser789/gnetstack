@@ -6,6 +6,8 @@ import "github.com/caser789/netstack/tcpip/link/rawfile"
 import "github.com/caser789/netstack/tcpip"
 import "github.com/caser789/netstack/tcpip/header"
 
+type dispatcher func(tcpip.NetworkProtocolNumber, []byte)
+
 
 type endpoint struct {
     // fd is the file descriptor used to send and receive packets.
@@ -52,7 +54,7 @@ func (e *endpoint) WritePacket(hdr, payload []byte) error {
     return rawfile.NonBlockingWrite2(e.fd, hdr, payload)
 }
 
-func (e *endpoint) Dispatch(deliver func(tcpip.NetworkProtocolNumber, []byte), largeV []byte) (bool, error) {
+func (e *endpoint) Dispatch(deliver dispatcher, largeV []byte) (bool, error) {
     n, err := rawfile.BlockingRead(e.fd, largeV)
     if err != nil {
         return false, err
@@ -80,4 +82,25 @@ func (e *endpoint) Dispatch(deliver func(tcpip.NetworkProtocolNumber, []byte), l
 
     deliver(p, v)
     return true, nil
+}
+
+// dispatchLoop reads packets from the file descriptor in a loop and dispatches
+// them to the network stack.
+func (e *endpoint) dispatchLoop(d dispatcher) error {
+	v := buffer.NewView(header.MaxIPPacketSize)
+	for {
+		cont, err := e.dispatch(d, v)
+		if err != nil || !cont {
+			if e.closed != nil {
+				e.closed(err)
+			}
+			return err
+		}
+	}
+}
+
+// Attach launches the goroutine that reads packets from the file descriptor and
+// dispatches them via the provided dispatcher.
+func (e *endpoint) Attach(d dispatcher) {
+    go e.dispatchLoop(d)
 }
