@@ -1,5 +1,7 @@
 package stack
 
+import "github.com/caser789/netstack/tcpip"
+
 // NetworkDispatcher contains the methods used by the network stack to deliver
 // packets to the appropriate network endpoint after it has been handled by
 // the data link layer

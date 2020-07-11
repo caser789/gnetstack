@@ -31,6 +31,6 @@ func main() {
 
     iep := ipv4.NewEndpoint(ep)
 
-    log.Printf("ipv4 ep mtu is %d", ep.MTU())
-    log.Printf("ipv4 ep MaxHeaderLength is %d", ep.MaxHeaderLength())
+    log.Printf("ipv4 ep mtu is %d", iep.MTU())
+    log.Printf("ipv4 ep MaxHeaderLength is %d", iep.MaxHeaderLength())
 }
