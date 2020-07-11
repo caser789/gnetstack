@@ -2,6 +2,8 @@ package fdbased
 
 import "syscall"
 import "github.com/caser789/netstack/tcpip/link/rawfile"
+import "github.com/caser789/netstack/tcpip"
+import "github.com/caser789/netstack/tcpip/header"
 
 
 type endpoint struct {
@@ -47,4 +49,34 @@ func (e *endpoint) WritePacket(hdr, payload []byte) error {
     }
 
     return rawfile.NonBlockingWrite2(e.fd, hdr, payload)
+}
+
+func (e *endpoint) dispatch(deliver func(tcpip.NetworkProtocolNumber, []byte), largeV []byte) (bool, error) {
+    n, err := rawfile.NonBlockingRead(e.fd, largeV)
+    if err != nil {
+        return false, err
+    }
+
+    if n <= 0 {
+        return false, err
+    }
+
+    v := make([]byte, len(largeV))
+    copy(v, largeV)
+
+    // We don't get any indication of what the packet is, so try to guess
+    // if it's an IPv4 or IPv6 packet.
+    var p tcpip.NetworkProtocolNumber
+    switch header.IPVersion(v) {
+    case header.IPv4Version:
+        p = header.IPv4ProtocolNumber
+    case header.IPv6Version:
+        p = header.IPv6ProtocolNumber
+    default:
+        log.Printf("unknown protocol to dispatch %q", header.IPVersion(v))
+        return true, nil
+    }
+
+    deliver(p, v)
+    return true, nil
 }

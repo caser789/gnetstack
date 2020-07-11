@@ -4,6 +4,11 @@ import "log"
 import "github.com/caser789/netstack/tcpip/link/tun"
 import "github.com/caser789/netstack/tcpip/link/rawfile"
 import "github.com/caser789/netstack/tcpip/link/fdbased"
+import "github.com/caser789/netstack/tcpip"
+
+func deliver(p tcpip.NetworkProtocolNumber, b []byte) {
+    log.Printf("in deviver %d %q", p, b)
+}
 
 func main() {
     tunName := "tun0"
@@ -22,4 +27,7 @@ func main() {
 
     log.Printf("fdbased mtu is %d", ep.MTU())
     log.Printf("fdbased MaxHeaderLength is %d", ep.MaxHeaderLength())
+
+    b := make([]byte, 100)
+    ep.dispatch(deliver, b)
 }
