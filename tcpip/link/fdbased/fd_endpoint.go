@@ -1,6 +1,7 @@
 package fdbased
 
 import "syscall"
+import "github.com/caser789/netstack/tcpip/link/rawfile"
 
 
 type endpoint struct {
@@ -42,8 +43,8 @@ func (e *endpoint) MaxHeaderLength() uint16 {
 // currently writable, the packet is dropped.
 func (e *endpoint) WritePacket(hdr, payload []byte) error {
     if payload == nil {
-        return NonBlockingWrite(e.fd, hdr)
+        return rawfile.NonBlockingWrite(e.fd, hdr)
     }
 
-    return NonBlockingWrite2(e.fd, hdr, payload)
+    return rawfile.NonBlockingWrite2(e.fd, hdr, payload)
 }
