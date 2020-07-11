@@ -1,4 +1,4 @@
-package main
+package tun
 
 import "syscall"
 import "unsafe"
