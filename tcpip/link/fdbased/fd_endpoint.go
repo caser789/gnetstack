@@ -30,7 +30,7 @@ func NewEndpoint(fd int, mtu int, closed func(error)) *endpoint {
 // MTU implements stack.LinkEndpoint.MTU. It returns the value initialized
 // during construction.
 func (e *endpoint) MTU() uint32 {
-    return uint32(e.tmu)
+    return uint32(e.mtu)
 }
 
 // MaxHeaderLength returns the maximum size of the header. Given that it
