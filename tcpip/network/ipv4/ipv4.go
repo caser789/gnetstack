@@ -6,6 +6,8 @@
 // Stack.NewEndpoint().
 package ipv4
 
+import "github.com/caser789/netstack/tcpip/stack"
+
 // maxTotalSize is maximum size that can be encoded in the 16-bit
 // TotalLength field of the ipv4 header.
 const maxTotalSize = 0xffff

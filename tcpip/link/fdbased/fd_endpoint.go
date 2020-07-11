@@ -4,9 +4,8 @@ import "syscall"
 import "log"
 import "github.com/caser789/netstack/tcpip/link/rawfile"
 import "github.com/caser789/netstack/tcpip"
+import "github.com/caser789/netstack/tcpip/stack"
 import "github.com/caser789/netstack/tcpip/header"
-
-type dispatcher func(tcpip.NetworkProtocolNumber, []byte)
 
 
 type endpoint struct {
@@ -54,7 +53,7 @@ func (e *endpoint) WritePacket(hdr, payload []byte) error {
     return rawfile.NonBlockingWrite2(e.fd, hdr, payload)
 }
 
-func (e *endpoint) Dispatch(deliver dispatcher, largeV []byte) (bool, error) {
+func (e *endpoint) dispatch(dispatcher stack.NetworkDispatcher, largeV []byte) (bool, error) {
     n, err := rawfile.BlockingRead(e.fd, largeV)
     if err != nil {
         return false, err
@@ -80,16 +79,17 @@ func (e *endpoint) Dispatch(deliver dispatcher, largeV []byte) (bool, error) {
         return true, nil
     }
 
-    deliver(p, v)
+    dispatcher.DeliverNetworkPacket(p, v)
     return true, nil
 }
 
 // dispatchLoop reads packets from the file descriptor in a loop and dispatches
 // them to the network stack.
-func (e *endpoint) dispatchLoop(d dispatcher) error {
-	v := buffer.NewView(header.MaxIPPacketSize)
+func (e *endpoint) dispatchLoop(dispatcher stack.NetworkDispatcher) error {
+	// v := buffer.NewView(header.MaxIPPacketSize)
+	v := make([]byte, header.MaxIPPacketSize)
 	for {
-		cont, err := e.dispatch(d, v)
+		cont, err := e.dispatch(dispatcher, v)
 		if err != nil || !cont {
 			if e.closed != nil {
 				e.closed(err)
@@ -101,6 +101,6 @@ func (e *endpoint) dispatchLoop(d dispatcher) error {
 
 // Attach launches the goroutine that reads packets from the file descriptor and
 // dispatches them via the provided dispatcher.
-func (e *endpoint) Attach(d dispatcher) {
-    go e.dispatchLoop(d)
+func (e *endpoint) Attach(dispatcher stack.NetworkDispatcher) {
+    go e.dispatchLoop(dispatcher)
 }

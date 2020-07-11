@@ -1,5 +1,14 @@
 package stack
 
+// NetworkDispatcher contains the methods used by the network stack to deliver
+// packets to the appropriate network endpoint after it has been handled by
+// the data link layer
+type NetworkDispatcher interface {
+    // DeliverNetworkPacket finds the appropriate network protocol
+    // endpoint and hands the packet over for further processing.
+    DeliverNetworkPacket(protocol tcpip.NetworkProtocolNumber, v []byte)
+}
+
 // LinkEndpoint is the interface implemented by data link layer protocols (e.g.,
 // ethernet, loopback, raw) and used by network layer protocols to send packets
 // out through the implementer's data link endpoint.
@@ -22,5 +31,5 @@ type LinkEndpoint interface {
 
     // Attach attaches the data link layer endpoint to the network-layer
     // dispatcher of the stack.
-    Attach()
+    Attach(dispatcher NetworkDispatcher)
 }
