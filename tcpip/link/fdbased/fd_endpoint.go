@@ -1,6 +1,7 @@
 package fdbased
 
 import "syscall"
+import "log"
 import "github.com/caser789/netstack/tcpip/link/rawfile"
 import "github.com/caser789/netstack/tcpip"
 import "github.com/caser789/netstack/tcpip/header"
@@ -52,7 +53,7 @@ func (e *endpoint) WritePacket(hdr, payload []byte) error {
 }
 
 func (e *endpoint) dispatch(deliver func(tcpip.NetworkProtocolNumber, []byte), largeV []byte) (bool, error) {
-    n, err := rawfile.NonBlockingRead(e.fd, largeV)
+    n, err := rawfile.BlockingRead(e.fd, largeV)
     if err != nil {
         return false, err
     }
