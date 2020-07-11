@@ -1,5 +1,7 @@
 package fdbased
 
+import "syscall"
+
 
 type endpoint struct {
     // fd is the file descriptor used to send and receive packets.
@@ -13,7 +15,16 @@ type endpoint struct {
     closed func(error)
 }
 
-// New creates a new fd-based endpoint. Register it to the stack
+// New creates a new fd-based endpoint
+func NewEndpoint(fd int, mtu int, closed func(error)) *endpoint {
+    syscall.SetNonblock(fd, true)
+
+    return &endpoint{
+        fd: fd,
+        mtu: mtu,
+        closed: closed,
+    }
+}
 
 // MTU implements stack.LinkEndpoint.MTU. It returns the value initialized
 // during construction.

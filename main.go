@@ -3,27 +3,23 @@ package main
 import "log"
 import "github.com/caser789/netstack/tcpip/link/tun"
 import "github.com/caser789/netstack/tcpip/link/rawfile"
+import "github.com/caser789/netstack/tcpip/link/fdbased"
 
 func main() {
-    log.Println("start")
-    name := "tun0"
-    fd, err := tun.Open(name)
-    if err != nil {
-        log.Printf("error = %q", err)
-    }
+    tunName := "tun0"
 
-    log.Printf("opened fd is %d", fd)
+	mtu, err := rawfile.GetMTU(tunName)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    mtu, err := rawfile.GetMTU("tun0")
-    if err != nil {
-        log.Printf("error = %q", err)
-    }
-    log.Printf("mtu fd is %d", mtu)
+	fd, err := tun.Open(tunName)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    b := make([]byte, 20)
-    rawfile.BlockingRead(fd, b)
+    ep := fdbased.NewEndpoint(fd, mtu, nil)
 
-    log.Println(b)
-
-    rawfile.NonBlockingWrite(fd, b)
+    log.Printf("fdbased mtu is %d", ep.MTU)
+    log.Printf("fdbased MaxHeaderLength is %d", ep.MaxHeaderLength)
 }
