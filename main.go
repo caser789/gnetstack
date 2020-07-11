@@ -29,5 +29,5 @@ func main() {
     log.Printf("fdbased MaxHeaderLength is %d", ep.MaxHeaderLength())
 
     b := make([]byte, 100)
-    ep.dispatch(deliver, b)
+    ep.Dispatch(deliver, b)
 }

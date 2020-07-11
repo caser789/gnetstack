@@ -52,7 +52,7 @@ func (e *endpoint) WritePacket(hdr, payload []byte) error {
     return rawfile.NonBlockingWrite2(e.fd, hdr, payload)
 }
 
-func (e *endpoint) dispatch(deliver func(tcpip.NetworkProtocolNumber, []byte), largeV []byte) (bool, error) {
+func (e *endpoint) Dispatch(deliver func(tcpip.NetworkProtocolNumber, []byte), largeV []byte) (bool, error) {
     n, err := rawfile.BlockingRead(e.fd, largeV)
     if err != nil {
         return false, err
