@@ -20,6 +20,6 @@ func main() {
 
     ep := fdbased.NewEndpoint(fd, mtu, nil)
 
-    log.Printf("fdbased mtu is %d", ep.MTU)
-    log.Printf("fdbased MaxHeaderLength is %d", ep.MaxHeaderLength)
+    log.Printf("fdbased mtu is %d", ep.MTU())
+    log.Printf("fdbased MaxHeaderLength is %d", ep.MaxHeaderLength())
 }
