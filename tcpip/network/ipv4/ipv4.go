@@ -67,7 +67,7 @@ func (e *endpoint) WritePacket(hdr *buffer.Prependable, payload buffer.View, pro
         Protocol: uint8(protocol),
         SrcAddr: tcpip.Address(e.address[:]),
         // DstAddr: r.RemoteAddress,
-        DstAddr: nil,
+        DstAddr: tcpip.Address(e.address[:]),
     })
     ip.SetChecksum(^ip.CalculateChecksum())
 

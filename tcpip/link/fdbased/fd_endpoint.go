@@ -48,10 +48,10 @@ func (e *endpoint) MaxHeaderLength() uint16 {
 // currently writable, the packet is dropped.
 func (e *endpoint) WritePacket(hdr *buffer.Prependable, payload buffer.View, protocol tcpip.NetworkProtocolNumber) error {
     if payload == nil {
-        return rawfile.NonBlockingWrite(e.fd, hdr)
+        return rawfile.NonBlockingWrite(e.fd, hdr.UsedBytes())
     }
 
-    return rawfile.NonBlockingWrite2(e.fd, hdr, payload)
+    return rawfile.NonBlockingWrite2(e.fd, hdr.UsedBytes(), payload)
 }
 
 func (e *endpoint) dispatch(dispatcher stack.NetworkDispatcher, largeV []byte) (bool, error) {
