@@ -47,6 +47,7 @@ func (e *endpoint) MaxHeaderLength() uint16 {
 // WritePacket writes outbound packets to the file descriptor. If it is not
 // currently writable, the packet is dropped.
 func (e *endpoint) WritePacket(hdr *buffer.Prependable, payload buffer.View, protocol tcpip.NetworkProtocolNumber) error {
+    log.Printf("link endpoint write packet hdr %q payload %q", hdr, payload)
     if payload == nil {
         return rawfile.NonBlockingWrite(e.fd, hdr.UsedBytes())
     }

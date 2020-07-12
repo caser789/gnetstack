@@ -1,8 +1,10 @@
+## test MTU() and MaxHeaderLength()
+
+```go
 package main
 
 import "log"
 import "github.com/caser789/netstack/tcpip/link/tun"
-import "github.com/caser789/netstack/tcpip/buffer"
 import "github.com/caser789/netstack/tcpip/link/rawfile"
 import "github.com/caser789/netstack/tcpip/link/fdbased"
 import "github.com/caser789/netstack/tcpip"
@@ -34,8 +36,12 @@ func main() {
 
     log.Printf("ipv4 ep mtu is %d", iep.MTU())
     log.Printf("ipv4 ep MaxHeaderLength is %d", iep.MaxHeaderLength())
-
-    hdr := buffer.NewPrependable(60)
-    payload := make([]byte, 10)
-    iep.WritePacket(&hdr, buffer.View(payload), tcpip.TransportProtocolNumber(1))
 }
+```
+
+```
+2020/07/12 04:27:28 fdbased mtu is 1500
+2020/07/12 04:27:28 fdbased MaxHeaderLength is 0
+2020/07/12 04:27:28 ipv4 ep mtu is 1480
+2020/07/12 04:27:28 ipv4 ep MaxHeaderLength is 20
+```
