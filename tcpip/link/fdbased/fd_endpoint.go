@@ -6,6 +6,7 @@ import "github.com/caser789/netstack/tcpip/link/rawfile"
 import "github.com/caser789/netstack/tcpip"
 import "github.com/caser789/netstack/tcpip/stack"
 import "github.com/caser789/netstack/tcpip/header"
+import "github.com/caser789/netstack/tcpip/buffer"
 
 
 type endpoint struct {
@@ -45,7 +46,7 @@ func (e *endpoint) MaxHeaderLength() uint16 {
 
 // WritePacket writes outbound packets to the file descriptor. If it is not
 // currently writable, the packet is dropped.
-func (e *endpoint) WritePacket(hdr, payload []byte) error {
+func (e *endpoint) WritePacket(hdr *buffer.Prependable, payload buffer.View, protocol tcpip.NetworkProtocolNumber) error {
     if payload == nil {
         return rawfile.NonBlockingWrite(e.fd, hdr)
     }

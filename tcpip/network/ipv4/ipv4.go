@@ -6,7 +6,9 @@
 // Stack.NewEndpoint().
 package ipv4
 
+import "github.com/caser789/netstack/tcpip"
 import "github.com/caser789/netstack/tcpip/stack"
+import "github.com/caser789/netstack/tcpip/buffer"
 import "github.com/caser789/netstack/tcpip/header"
 
 // maxTotalSize is maximum size that can be encoded in the 16-bit
@@ -16,14 +18,20 @@ const maxTotalSize = 0xffff
 // ProtocolNumber is the ipv4 protocol number
 const ProtocolNumber = header.IPv4ProtocolNumber
 
+type address [header.IPv4AddressSize]byte
+
 type endpoint struct {
     linkEP stack.LinkEndpoint
+    address address
 }
 
-func NewEndpoint(linkEP stack.LinkEndpoint) *endpoint{
-    return &endpoint{
+func NewEndpoint(addr tcpip.Address, linkEP stack.LinkEndpoint) *endpoint{
+    e := &endpoint{
         linkEP: linkEP,
     }
+    copy(e.address[:], addr)
+
+    return e
 }
 
 // MaxHeaderLength returns the maximum length needed by ipv4 headers (and
@@ -58,9 +66,10 @@ func (e *endpoint) WritePacket(hdr *buffer.Prependable, payload buffer.View, pro
         TTL: 65,
         Protocol: uint8(protocol),
         SrcAddr: tcpip.Address(e.address[:]),
-        DstAddr: r.RemoteAddress,
+        // DstAddr: r.RemoteAddress,
+        DstAddr: nil,
     })
-    ip.SetChecksum(^ip.CalculatedChecksum())
+    ip.SetChecksum(^ip.CalculateChecksum())
 
     return e.linkEP.WritePacket(hdr, payload, ProtocolNumber)
 }

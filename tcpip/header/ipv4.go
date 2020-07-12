@@ -1,6 +1,7 @@
 package header
 
 import "github.com/caser789/netstack/tcpip"
+import "encoding/binary"
 
 
 // IPv4Version is the version of the ipv4 protocol.
@@ -15,13 +16,18 @@ const IPv4MinimumSize = 20
 // IPv4AddressSize is the size, in bytes, of an IPv4 address.
 const IPv4AddressSize = 4
 
+// IPv4MaximumHeaderSize is the maximum size of an IPv4 header. Given
+// that there are only 4 bits to represents the header length in 32-bit
+// units, the header cannot exceed 15*4 = 60 bytes.
+const IPv4MaximumHeaderSize = 60
+
 // IPv4 represents an ipv4 header stored in a byte array.
 type IPv4 []byte
 
 // Encode encodes all the fields of the ipv4 header.
 func (b IPv4) Encode(i *IPv4Fields) {
     b[versIHL] = (4 << 4) | ((i.IHL/4) & 0xf)
-    b.SetTOS(i.TOS, nil)
+    b.SetTOS(i.TOS, 0)
     b.SetTotalLength(i.TotalLength)
     binary.BigEndian.PutUint16(b[id:], i.ID)
     b.SetFlagsFragmentOffset(i.Flags, i.FragmentOffset)

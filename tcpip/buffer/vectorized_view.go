@@ -1,3 +1,0 @@
-package buffer
-
-type Vectorised
