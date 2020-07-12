@@ -8,9 +8,6 @@ import "github.com/caser789/netstack/tcpip/link/fdbased"
 import "github.com/caser789/netstack/tcpip"
 import "github.com/caser789/netstack/tcpip/network/ipv4"
 
-func deliver(p tcpip.NetworkProtocolNumber, b []byte) {
-    log.Printf("in deviver %d %q", p, b)
-}
 
 func main() {
     tunName := "tun0"
@@ -38,4 +35,7 @@ func main() {
     hdr := buffer.NewPrependable(60)
     payload := make([]byte, 10)
     iep.WritePacket(&hdr, buffer.View(payload), tcpip.TransportProtocolNumber(1))
+
+    v := make([]byte, 60)
+    iep.HandlePacket(buffer.View(v))
 }

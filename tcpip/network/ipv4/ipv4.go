@@ -23,6 +23,7 @@ type address [header.IPv4AddressSize]byte
 type endpoint struct {
     linkEP stack.LinkEndpoint
     address address
+    dispatcher stack.TransportDispatcher
 }
 
 func NewEndpoint(addr tcpip.Address, linkEP stack.LinkEndpoint) *endpoint{
@@ -72,4 +73,15 @@ func (e *endpoint) WritePacket(hdr *buffer.Prependable, payload buffer.View, pro
     ip.SetChecksum(^ip.CalculateChecksum())
 
     return e.linkEP.WritePacket(hdr, payload, ProtocolNumber)
+}
+
+func (e *endpoint) HandlePacket(v buffer.View) {
+    h := header.IPv4(v)
+    // validate header
+    // Handle fragment
+
+    hlen := int(h.HeaderLength())
+    tlen := int(h.TotalLength())
+    v.CapLength(tlen - hlen)
+    e.dispatcher.DeliverTransportPacket(tcpip.TransportProtocolNumber(h.Protocol()), v)
 }

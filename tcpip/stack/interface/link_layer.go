@@ -3,15 +3,6 @@ package stack
 import "github.com/caser789/netstack/tcpip"
 import "github.com/caser789/netstack/tcpip/buffer"
 
-// NetworkDispatcher contains the methods used by the network stack to deliver
-// packets to the appropriate network endpoint after it has been handled by
-// the data link layer
-type NetworkDispatcher interface {
-    // DeliverNetworkPacket finds the appropriate network protocol
-    // endpoint and hands the packet over for further processing.
-    DeliverNetworkPacket(protocol tcpip.NetworkProtocolNumber, v []byte)
-}
-
 // LinkEndpoint is the interface implemented by data link layer protocols (e.g.,
 // ethernet, loopback, raw) and used by network layer protocols to send packets
 // out through the implementer's data link endpoint.
