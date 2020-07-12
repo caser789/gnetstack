@@ -1,6 +1,7 @@
 package stack
 
 import "github.com/caser789/netstack/tcpip"
+import "github.com/caser789/netstack/tcpip/buffer"
 
 // NetworkDispatcher contains the methods used by the network stack to deliver
 // packets to the appropriate network endpoint after it has been handled by
@@ -29,7 +30,7 @@ type LinkEndpoint interface {
 
     // WritePacket writes a packet with the given protocol through the given
     // route.
-    WritePacket(hdr, payload []byte) error
+    WritePacket(hdr *buffer.Prependable, payload buffer.View, protocol tcpip.NetworkProtocolNumber) error
 
     // Attach attaches the data link layer endpoint to the network-layer
     // dispatcher of the stack.
